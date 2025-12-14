@@ -21,12 +21,13 @@
     }
     #scratchCanvas {
       z-index: 1;
+      cursor: crosshair;
     }
   </style>
 </head>
 <body>
 
-<video id="videoBackground" autoplay muted loop>
+<video id="videoBackground" preload="auto" playsinline>
   <source src="video_felibuche.mp4" type="video/mp4">
   Votre navigateur ne supporte pas la vidéo.
 </video>
@@ -38,6 +39,8 @@
   const ctx = canvas.getContext('2d');
   const image = new Image();
   const SCRATCH_RADIUS = 30;
+  const video = document.getElementById('videoBackground');
+  let videoStarted = false;
 
   function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -57,6 +60,13 @@
     ctx.beginPath();
     ctx.arc(x, y, SCRATCH_RADIUS, 0, 2 * Math.PI);
     ctx.fill();
+
+    // Lancer la vidéo avec le son uniquement au 1er grattage
+    if (!videoStarted) {
+      video.muted = false;
+      video.play().catch(err => console.log("Erreur lecture vidéo:", err));
+      videoStarted = true;
+    }
   }
 
   canvas.addEventListener('mousedown', (e) => {

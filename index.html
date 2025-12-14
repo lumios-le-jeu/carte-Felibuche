@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Carte Felibuche 🎄</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    #videoBackground, #scratchCanvas {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 0;
+    }
+    #scratchCanvas {
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+<video id="videoBackground" autoplay muted loop>
+  <source src="video_felibuche.mp4" type="video/mp4">
+  Votre navigateur ne supporte pas la vidéo.
+</video>
+
+<canvas id="scratchCanvas"></canvas>
+
+<script>
+  const canvas = document.getElementById('scratchCanvas');
+  const ctx = canvas.getContext('2d');
+  const image = new Image();
+  const SCRATCH_RADIUS = 30;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'destination-out';
+  }
+
+  image.onload = () => resizeCanvas();
+  image.src = "gratte_felibuche.jpg";
+
+  function scratch(event) {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    ctx.beginPath();
+    ctx.arc(x, y, SCRATCH_RADIUS, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+
+  canvas.addEventListener('mousedown', (e) => {
+    canvas.addEventListener('mousemove', scratch);
+    scratch(e);
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    canvas.removeEventListener('mousemove', scratch);
+  });
+
+  window.addEventListener('resize', resizeCanvas);
+</script>
+
+</body>
+</html>

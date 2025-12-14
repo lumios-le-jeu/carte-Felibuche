@@ -8,6 +8,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
+      touch-action: none; /* Désactive le scroll tactile */
     }
     #videoBackground, #scratchCanvas {
       position: absolute;
@@ -52,31 +53,45 @@
   image.onload = () => resizeCanvas();
   image.src = "gratte_felibuche.jpg";
 
-  function scratch(event) {
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
+  function scratchAt(x, y) {
     ctx.beginPath();
     ctx.arc(x, y, SCRATCH_RADIUS, 0, 2 * Math.PI);
     ctx.fill();
 
-    // Lancer la vidéo avec le son uniquement au 1er grattage
     if (!videoStarted) {
       video.muted = false;
-      video.play().catch(err => console.log("Erreur lecture vidéo:", err));
+      video.play().catch(e => console.log("Erreur lecture vidéo:", e));
       videoStarted = true;
     }
   }
 
+  // Souris
   canvas.addEventListener('mousedown', (e) => {
-    canvas.addEventListener('mousemove', scratch);
-    scratch(e);
+    scratchAt(e.clientX, e.clientY);
+    canvas.addEventListener('mousemove', mouseMove);
+  });
+  canvas.addEventListener('mouseup', () => {
+    canvas.removeEventListener('mousemove', mouseMove);
   });
 
-  canvas.addEventListener('mouseup', () => {
-    canvas.removeEventListener('mousemove', scratch);
-  });
+  function mouseMove(e) {
+    scratchAt(e.clientX, e.clientY);
+  }
+
+  // Tactile
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    scratchAt(touch.clientX - rect.left, touch.clientY - rect.top);
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    scratchAt(touch.clientX - rect.left, touch.clientY - rect.top);
+  }, { passive: false });
 
   window.addEventListener('resize', resizeCanvas);
 </script>
